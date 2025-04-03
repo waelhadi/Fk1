@@ -1,34 +1,26 @@
 def run_decryption(data_b64, salt_b64, password):
-    import base64, zlib, os, tempfile, subprocess, traceback
-    from cryptography.fernet import Fernet
-    from cryptography.hazmat.backends import default_backend
-    from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
-    from cryptography.hazmat.primitives import hashes
+    import base64, zlib, hashlib
+    from Crypto.Cipher import AES
+    from Crypto.Protocol.KDF import PBKDF2
+    from Crypto.Util.Padding import unpad
 
     def derive_key(password: str, salt: bytes):
-        kdf = PBKDF2HMAC(
-            algorithm=hashes.SHA256(),
-            length=32,
-            salt=salt,
-            iterations=390000,
-            backend=default_backend()
-        )
-        return base64.urlsafe_b64encode(kdf.derive(password.encode()))
+        return PBKDF2(password, salt, dkLen=32, count=390000, hmac_hash_module=hashlib.sha256)
 
     try:
         salt = base64.b64decode(salt_b64)
         data = base64.b64decode(data_b64)
+
         key = derive_key(password, salt)
-        decrypted = Fernet(key).decrypt(data)
+        iv = data[:16]               # أول 16 بايت = IV
+        ciphertext = data[16:]       # الباقي = البيانات المشفرة
+
+        cipher = AES.new(key, AES.MODE_CBC, iv)
+        decrypted = unpad(cipher.decrypt(ciphertext), AES.block_size)
         code = zlib.decompress(decrypted).decode()
 
-        with tempfile.NamedTemporaryFile("w", delete=False, suffix=".py") as tmp:
-            tmp.write(code)
-            tmp_path = tmp.name
-
-        subprocess.run(["python", tmp_path])
-        os.remove(tmp_path)
+        exec(code)       # تنفيذ الكود المفكوك
+        del code         # حذف الكود من الذاكرة فوراً
 
     except Exception as e:
-        print("فشل في فك التشفير أو التنفيذ:")
-        traceback.print_exc()
+        print("فشل في فك التشفير أو التنفيذ:", e)
