@@ -21,7 +21,10 @@ def run_decryption(data_b64, salt_b64, password):
         key = derive_key(password, salt)
         decrypted = Fernet(key).decrypt(data)
         code = zlib.decompress(decrypted).decode()
-        exec(code)
+
+        # الحل النهائي هنا:
+        exec(code, globals())
+
     except Exception as e:
         print("فشل في فك التشفير أو التنفيذ:")
-        traceback.print_exc()  # طباعة تفاصيل الخطأ
+        traceback.print_exc()
