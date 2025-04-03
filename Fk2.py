@@ -1,5 +1,5 @@
 def run_decryption(data_b64, salt_b64, password):
-    import base64, zlib, os, traceback
+    import base64, zlib, traceback
     from cryptography.fernet import Fernet
     from cryptography.hazmat.backends import default_backend
     from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
@@ -22,8 +22,8 @@ def run_decryption(data_b64, salt_b64, password):
         decrypted = Fernet(key).decrypt(data)
         code = zlib.decompress(decrypted).decode()
 
-        # الحل النهائي هنا:
-        exec(code, globals())
+        # الحل السحري هنا:
+        exec("import os\n" + code, globals())
 
     except Exception as e:
         print("فشل في فك التشفير أو التنفيذ:")
