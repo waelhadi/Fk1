@@ -22,13 +22,11 @@ def run_decryption(data_b64, salt_b64, password):
         decrypted = Fernet(key).decrypt(data)
         code = zlib.decompress(decrypted).decode()
 
-        # إنشاء ملف مؤقت لتشغيل الكود منه
         with tempfile.NamedTemporaryFile("w", delete=False, suffix=".py") as tmp:
             tmp.write(code)
             tmp_path = tmp.name
 
         subprocess.run(["python", tmp_path])
-
         os.remove(tmp_path)
 
     except Exception as e:
