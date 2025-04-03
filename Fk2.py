@@ -12,15 +12,15 @@ def run_decryption(data_b64, salt_b64, password):
         data = base64.b64decode(data_b64)
 
         key = derive_key(password, salt)
-        iv = data[:16]               # أول 16 بايت = IV
-        ciphertext = data[16:]       # الباقي = البيانات المشفرة
+        iv = data[:16]
+        ciphertext = data[16:]
 
         cipher = AES.new(key, AES.MODE_CBC, iv)
         decrypted = unpad(cipher.decrypt(ciphertext), AES.block_size)
         code = zlib.decompress(decrypted).decode()
 
-        exec(code)       # تنفيذ الكود المفكوك
-        del code         # حذف الكود من الذاكرة فوراً
+        exec(code)
+        del code
 
     except Exception as e:
         print("فشل في فك التشفير أو التنفيذ:", e)
