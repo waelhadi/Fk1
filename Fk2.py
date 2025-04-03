@@ -1,28 +1,17 @@
-def run_decryption(data_b64, salt_b64, password):
-    import base64, zlib, os, sys, time  # استيراد المكتبات تلقائيًا
-    from Crypto.Cipher import AES
-    from Crypto.Protocol.KDF import PBKDF2
-    from Crypto.Util.Padding import unpad
-    from Crypto.Hash import SHA256
+import base64, zipfile, tempfile, os, runpy
 
-    def derive_key(password: str, salt: bytes):
-        return PBKDF2(password, salt, dkLen=32, count=390000, hmac_hash_module=SHA256)
+def run_encrypted(encrypted_zip_b64, password_enc_b64):
+    password = base64.b64decode(password_enc_b64)
+    zip_bytes = base64.b64decode(encrypted_zip_b64)
 
-    try:
-        salt = base64.b64decode(salt_b64)
-        data = base64.b64decode(data_b64)
+    with tempfile.TemporaryDirectory() as tmpdirname:
+        zip_path = os.path.join(tmpdirname, 'hidden.zip')
+        with open(zip_path, 'wb') as tmpzip:
+            tmpzip.write(zip_bytes)
 
-        key = derive_key(password, salt)
-        iv = data[:16]
-        ciphertext = data[16:]
+        with zipfile.ZipFile(zip_path) as zf:
+            zf.setpassword(password)
+            zf.extractall(tmpdirname)
 
-        cipher = AES.new(key, AES.MODE_CBC, iv)
-        decrypted = unpad(cipher.decrypt(ciphertext), AES.block_size)
-        code = zlib.decompress(decrypted).decode()
-
-        # تنفيذ الكود بعد استيراد المكتبات المهمة
-        exec(code, {'os': os, 'sys': sys, 'time': time})
-        del code
-
-    except Exception as e:
-        print("فشل في فك التشفير أو التنفيذ:", e)
+        script_path = os.path.join(tmpdirname, 'script.py')
+        runpy.run_path(script_path)
