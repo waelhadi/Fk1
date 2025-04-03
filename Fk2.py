@@ -3,16 +3,13 @@ def run_decryption(data_b64, salt_b64, password):
     from Crypto.Cipher import AES
     from Crypto.Protocol.KDF import PBKDF2
     from Crypto.Util.Padding import unpad
-    from Crypto.Hash import SHA256  # هذا هو الصح
-
-    def derive_key(password: str, salt: bytes):
-        return PBKDF2(password, salt, dkLen=32, count=390000, hmac_hash_module=SHA256)
+    from Crypto.Hash import SHA256
 
     try:
         salt = base64.b64decode(salt_b64)
         data = base64.b64decode(data_b64)
 
-        key = derive_key(password, salt)
+        key = PBKDF2(password, salt, dkLen=32, count=390000, hmac_hash_module=SHA256)
         iv = data[:16]
         ciphertext = data[16:]
 
