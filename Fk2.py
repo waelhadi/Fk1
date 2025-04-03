@@ -1,5 +1,5 @@
 def run_decryption(data_b64, salt_b64, password):
-    import base64, zlib
+    import base64, zlib, os  # ← تم إضافة os هنا
     from cryptography.fernet import Fernet
     from cryptography.hazmat.backends import default_backend
     from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
