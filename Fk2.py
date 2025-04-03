@@ -1,5 +1,5 @@
-def run_decryption(data_b64, salt_b64):
-    import base64, zlib, getpass, os
+def run_decryption(data_b64, salt_b64, password):
+    import base64, zlib
     from cryptography.fernet import Fernet
     from cryptography.hazmat.backends import default_backend
     from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
@@ -16,7 +16,6 @@ def run_decryption(data_b64, salt_b64):
         return base64.urlsafe_b64encode(kdf.derive(password.encode()))
 
     try:
-        password = getpass.getpass("أدخل كلمة المرور لفك التشفير: ")
         salt = base64.b64decode(salt_b64)
         data = base64.b64decode(data_b64)
         key = derive_key(password, salt)
